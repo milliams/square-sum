@@ -20,8 +20,8 @@ fn square_sum_graph(n: usize) -> petgraph::Graph<usize, u8, petgraph::Undirected
         deps.add_node(i);
         for j in integers().take(i) {
             if s.contains(&(i + j)) {
-                let i_index = petgraph::graph::NodeIndex::<usize>::new(i-1);
-                let j_index = petgraph::graph::NodeIndex::<usize>::new(j-1);
+                let i_index = petgraph::graph::node_index(i-1);
+                let j_index = petgraph::graph::node_index(j-1);
                 deps.add_edge(i_index, j_index, 1);
             }
         }

@@ -1,0 +1,7 @@
+[package]
+name = "square-sum"
+version = "0.1.0"
+authors = ["Matt Williams <matt@milliams.com>"]
+
+[dependencies]
+petgraph = "0.4.11"

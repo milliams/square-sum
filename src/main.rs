@@ -40,20 +40,20 @@ fn order(g: &petgraph::Graph<usize, u8, petgraph::Undirected, usize>) -> usize {
 
 /// http://doc.sagemath.org/html/en/reference/graphs/sage/graphs/generic_graph_pyx.html#sage.graphs.generic_graph_pyx.find_hamiltonian
 /// https://github.com/sagemath/sage/blob/master/src/sage/graphs/generic_graph_pyx.pyx
-fn find_hamiltonian(g: petgraph::Graph<usize, u8, petgraph::Undirected, usize>) -> Option<Vec<petgraph::graph::NodeIndex<usize>>> {
+fn find_hamiltonian(g: &petgraph::Graph<usize, u8, petgraph::Undirected, usize>) -> Option<Vec<petgraph::graph::NodeIndex<usize>>> {
     if petgraph::algo::connected_components(&g) != 1 {
         return None;
     }
 
     let mut rng = rand::thread_rng();
-    let start = rng.gen_range(1, order(&g) + 1);
+    let start = rng.gen_range(1, order(g) + 1);
 
     //let start = petgraph::graph::node_index(start);
     //let goal = petgraph::graph::node_index(5);
 
-    let path: VecDeque<usize> = VecDeque::with_capacity(order(&g));
-    let member: Vec<bool> = vec![false; order(&g)];
-    let path: Vec<usize> = Vec::with_capacity(order(&g));
+    let path: VecDeque<usize> = VecDeque::with_capacity(order(g));
+    let member: Vec<bool> = vec![false; order(g)];
+    let path: Vec<usize> = Vec::with_capacity(order(g));
 
     None
 }

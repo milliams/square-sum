@@ -35,7 +35,7 @@ fn square_sum_graph(n: usize) -> petgraph::Graph<usize, u8, petgraph::Undirected
             if s.contains(&(i + j)) {
                 let i_index = petgraph::graph::node_index(i - 1);
                 let j_index = petgraph::graph::node_index(j - 1);
-                g.add_edge(i_index, j_index, 1);
+                g.update_edge(i_index, j_index, 1);
             }
         }
     }

@@ -15,18 +15,18 @@ fn integers() -> std::ops::Range<usize> {
 }
 
 fn squares() -> std::iter::Map<std::ops::Range<usize>, fn(usize) -> usize> {
-    integers().map(|x| x*x)
+    integers().map(|x| x * x)
 }
 
 fn square_sum_graph(n: usize) -> petgraph::Graph<usize, u8, petgraph::Undirected, usize> {
-    let s: Vec<usize> = squares().take_while(|&x| x <= (n*2) - 1).collect();
-    let mut deps = petgraph::Graph::default();  // TODO use with_capacity
+    let s: Vec<usize> = squares().take_while(|&x| x <= (n * 2) - 1).collect();
+    let mut deps = petgraph::Graph::default(); // TODO use with_capacity
     for i in integers().take(n) {
         deps.add_node(i);
         for j in integers().take(i) {
             if s.contains(&(i + j)) {
-                let i_index = petgraph::graph::node_index(i-1);
-                let j_index = petgraph::graph::node_index(j-1);
+                let i_index = petgraph::graph::node_index(i - 1);
+                let j_index = petgraph::graph::node_index(j - 1);
                 deps.add_edge(i_index, j_index, 1);
             }
         }
@@ -40,7 +40,9 @@ fn order(g: &petgraph::Graph<usize, u8, petgraph::Undirected, usize>) -> usize {
 
 /// http://doc.sagemath.org/html/en/reference/graphs/sage/graphs/generic_graph_pyx.html#sage.graphs.generic_graph_pyx.find_hamiltonian
 /// https://github.com/sagemath/sage/blob/master/src/sage/graphs/generic_graph_pyx.pyx
-fn find_hamiltonian(g: &petgraph::Graph<usize, u8, petgraph::Undirected, usize>) -> Option<Vec<petgraph::graph::NodeIndex<usize>>> {
+fn find_hamiltonian(
+    g: &petgraph::Graph<usize, u8, petgraph::Undirected, usize>,
+) -> Option<Vec<petgraph::graph::NodeIndex<usize>>> {
     if petgraph::algo::connected_components(&g) != 1 {
         return None;
     }

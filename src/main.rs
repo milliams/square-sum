@@ -24,6 +24,9 @@ fn square_sum_graph(n: usize) -> petgraph::Graph<usize, u8, petgraph::Undirected
     for i in integers().take(n) {
         deps.add_node(i);
         for j in integers().take(i) {
+            if i == j {
+                continue;
+            }
             if s.contains(&(i + j)) {
                 let i_index = petgraph::graph::node_index(i - 1);
                 let j_index = petgraph::graph::node_index(j - 1);

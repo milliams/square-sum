@@ -117,13 +117,13 @@ fn find_hamiltonian(
         let v = *path.last().expect("There should be at least one node in the path");
 
         // Create list of possible next vertices
-        let possible_next: Vec<_> = g.neighbors((v).into()).filter(|n| !member[n.index()]).collect();
+        let possible_next_nodes: Vec<_> = g.neighbors((v).into()).filter(|n| !member[n.index()]).collect();
+        let next = rng.choose(&possible_next_nodes).and_then(|i| Some(i.index()));
 
         // If there are any, choose one randomly and add it to the path
-        if !possible_next.is_empty() {
-            let next = rng.choose(&possible_next).expect("Node had no neighbours!").index();
-            path.push(next);
-            member[next] = true;
+        if let Some(v) = next {
+            path.push(v);
+            member[v] = true;
         } else {
             // but we have a new longest path anyway, so set `longest_path`
             if path.len() > longest_path.len() {

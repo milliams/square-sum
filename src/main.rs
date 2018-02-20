@@ -26,7 +26,10 @@ fn main() {
             println!("found");
             println!("valid square-sum sequence {}", check_sum_squares(&h));
         }
-        Err(e) => println!("fail {:?}", e),
+        Err(e) => {
+            println!("fail {:?}", e);
+            ::std::process::exit(1);
+        },
     }
 }
 

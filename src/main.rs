@@ -38,34 +38,30 @@ fn squares() -> std::iter::Map<std::ops::Range<usize>, fn(usize) -> usize> {
     integers().map(|x| x * x)
 }
 
-fn square_sum_graph(n: usize) -> petgraph::Graph<usize, u8, petgraph::Undirected, usize> {
+fn square_sum_graph(n: usize) -> petgraph::Graph<(), (), petgraph::Undirected, usize> {
     let s: Vec<usize> = squares().take_while(|&x| x <= (n * 2) - 1).collect();
     let mut g = petgraph::Graph::default(); // TODO use with_capacity
     //let mut g = petgraph::Graph::with_capacity(16384, 579038);
     for i in integers().take(n) {
-        //println!("i: {}", i);
-        g.add_node(i);
+        g.add_node(());
         for sq in s.iter().skip(1).skip_while(|&sq| sq <= &i).take_while(|&sq| sq <= &((i * 2) - 1)) {
-            //println!("sq: {}", sq);
             let i_index = petgraph::graph::node_index(i - 1);
             let j_index = petgraph::graph::node_index(sq - i - 1);
-            g.update_edge(i_index, j_index, 1);
+            g.update_edge(i_index, j_index, ());
         }
     }
     g
 }
 
-fn order(g: &petgraph::Graph<usize, u8, petgraph::Undirected, usize>) -> usize {
+fn order(g: &petgraph::Graph<(), (), petgraph::Undirected, usize>) -> usize {
     g.node_count()
 }
 
-fn setup_path(g: &petgraph::Graph<usize, u8, petgraph::Undirected, usize>, path: &mut Vec<usize>, member: &mut Vec<bool>) {
+fn setup_path(g: &petgraph::Graph<(), (), petgraph::Undirected, usize>, path: &mut Vec<usize>, member: &mut Vec<bool>) {
     let mut rng = rand::thread_rng();
 
     let start = petgraph::graph::node_index(rng.gen_range(0, order(g)));
-    //println!("start: {:?}", start);
     let neighbours = g.neighbors(start).collect::<Vec<_>>();
-    //println!("neighbours: {:?}", neighbours);
     let next = rng.choose(&neighbours).expect("Node had no neighbours!").index();
 
     path.clear();
@@ -78,7 +74,7 @@ fn setup_path(g: &petgraph::Graph<usize, u8, petgraph::Undirected, usize>, path:
 }
 
 fn find_hamiltonian(
-    g: &petgraph::Graph<usize, u8, petgraph::Undirected, usize>,
+    g: &petgraph::Graph<(), (), petgraph::Undirected, usize>,
 ) -> Result<Vec<usize>, &'static str> {
     if petgraph::algo::connected_components(&g) != 1 {
         return Err("Not a fully-connected graph");
@@ -154,6 +150,7 @@ fn find_hamiltonian(
         if path.len() == g.node_count() {
             println!("iterations: {:?}", iteration);
             println!("resets: {:?}", resets);
+            println!("total iterations: {:?}", resets * reset_rate);
             return Ok(path.iter().map(|&a| a+1).collect());
         }
 

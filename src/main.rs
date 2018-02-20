@@ -41,17 +41,15 @@ fn squares() -> std::iter::Map<std::ops::Range<usize>, fn(usize) -> usize> {
 fn square_sum_graph(n: usize) -> petgraph::Graph<usize, u8, petgraph::Undirected, usize> {
     let s: Vec<usize> = squares().take_while(|&x| x <= (n * 2) - 1).collect();
     let mut g = petgraph::Graph::default(); // TODO use with_capacity
+    //let mut g = petgraph::Graph::with_capacity(16384, 579038);
     for i in integers().take(n) {
+        //println!("i: {}", i);
         g.add_node(i);
-        for j in integers().take(i) {
-            if i == j {
-                continue;
-            }
-            if s.contains(&(i + j)) {
-                let i_index = petgraph::graph::node_index(i - 1);
-                let j_index = petgraph::graph::node_index(j - 1);
-                g.update_edge(i_index, j_index, 1);
-            }
+        for sq in s.iter().skip(1).skip_while(|&sq| sq <= &i).take_while(|&sq| sq <= &((i * 2) - 1)) {
+            //println!("sq: {}", sq);
+            let i_index = petgraph::graph::node_index(i - 1);
+            let j_index = petgraph::graph::node_index(sq - i - 1);
+            g.update_edge(i_index, j_index, 1);
         }
     }
     g
@@ -169,4 +167,9 @@ fn find_hamiltonian(
 
         iteration += 1;
     }
+}
+
+fn check_sum_squares(vals: Vec<usize>) -> bool {
+    let s: Vec<usize> = squares().take_while(|&x| x <= (vals.len() * 2) - 1).collect();
+    vals.iter().zip(vals.iter().skip(1)).all(|(&a, &b)| s.contains(&(a+b)))
 }

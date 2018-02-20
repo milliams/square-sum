@@ -6,3 +6,4 @@ authors = ["Matt Williams <matt@milliams.com>"]
 [dependencies]
 petgraph = "0.4.11"
 rand = "0.4"
+time = "*"

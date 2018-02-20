@@ -42,7 +42,15 @@ fn squares() -> std::iter::Map<std::ops::Range<usize>, fn(usize) -> usize> {
 }
 
 fn square_sum_graph(n: usize) -> petgraph::Graph<(), (), petgraph::Undirected, usize> {
+    let mut g = init_square_sum_path(n);
     let s: Vec<usize> = squares().take_while(|&x| x <= (n * 2) - 1).collect();
+    for _i in integers().take(n) {
+        add_square_sum_node(&mut g, &s);
+    }
+    g
+}
+
+fn init_square_sum_path(n: usize) -> petgraph::Graph<(), (), petgraph::Undirected, usize> {
     let num_edges: usize = integers()
         .take(n)
         .map(|i| {
@@ -50,19 +58,20 @@ fn square_sum_graph(n: usize) -> petgraph::Graph<(), (), petgraph::Undirected, u
                 - f64::floor(f64::sqrt(i as f64)) as usize
         })
         .sum();
-    let mut g = petgraph::Graph::with_capacity(n, num_edges);
-    for i in integers().take(n) {
-        g.add_node(());
-        for sq in s.iter()
-            .skip_while(|&sq| sq <= &i)
-            .take_while(|&sq| sq <= &((i * 2) - 1))
-        {
-            let i_index = petgraph::graph::node_index(i - 1);
-            let j_index = petgraph::graph::node_index(sq - i - 1);
-            g.update_edge(i_index, j_index, ());
-        }
+    petgraph::Graph::with_capacity(n, num_edges)
+}
+
+fn add_square_sum_node(g: &mut petgraph::Graph<(), (), petgraph::Undirected, usize>, square_numbers: &[usize]) {
+    let i = g.node_count() + 1;
+    g.add_node(());
+    for sq in square_numbers.iter()
+        .skip_while(|&sq| sq <= &i)
+        .take_while(|&sq| sq <= &((i * 2) - 1))
+    {
+        let i_index = petgraph::graph::node_index(i - 1);
+        let j_index = petgraph::graph::node_index(sq - i - 1);
+        g.update_edge(i_index, j_index, ());
     }
-    g
 }
 
 fn order(g: &petgraph::Graph<(), (), petgraph::Undirected, usize>) -> usize {

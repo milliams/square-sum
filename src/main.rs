@@ -1,18 +1,30 @@
 extern crate petgraph;
 extern crate rand;
+extern crate time;
 
 use std::cmp::min;
 
 use rand::Rng;
 
 fn main() {
-    let g = square_sum_graph(usize::pow(2, 10));
+    println!("Generating graph... ");
+    let start_graph = time::PreciseTime::now();
+    let g = square_sum_graph(usize::pow(2, 18));
+    let end_graph = time::PreciseTime::now();
+    println!("{} seconds", start_graph.to(end_graph));
+
+    println!("nodes: {} edges: {}", g.node_count(), g.edge_count());
+
+    println!("Finding Hamiltonian path... ");
+    let start_ham = time::PreciseTime::now();
     let ham = find_hamiltonian(&g);
+    let end_ham = time::PreciseTime::now();
+    println!("{} seconds", start_ham.to(end_ham));
+
     match ham {
         Some(h) => {println!("found")},
         None => {println!("fail")}
     }
-    //println!("{:?}", ham);
 }
 
 fn integers() -> std::ops::Range<usize> {
@@ -64,8 +76,6 @@ fn setup_path(g: &petgraph::Graph<usize, u8, petgraph::Undirected, usize>, path:
     member[next] = true;
 }
 
-/// http://doc.sagemath.org/html/en/reference/graphs/sage/graphs/generic_graph_pyx.html#sage.graphs.generic_graph_pyx.find_hamiltonian
-/// https://github.com/sagemath/sage/blob/master/src/sage/graphs/generic_graph_pyx.pyx
 fn find_hamiltonian(
     g: &petgraph::Graph<usize, u8, petgraph::Undirected, usize>,
 ) -> Option<Vec<usize>> {
@@ -75,8 +85,9 @@ fn find_hamiltonian(
 
     let reverse_rate = 10;
     let backtrack_rate = 1000;
-    let reset_rate = 30_000;
-    let max_iterations = 100_000;
+    let backtrack_amount = 5;
+    let reset_rate = g.node_count() * 5;  // Must be larger than num nodes
+    let max_iterations = reset_rate * 5;
 
     let mut rng = rand::thread_rng();
 
@@ -105,11 +116,11 @@ fn find_hamiltonian(
 
         // Backtrack a smidge now and again
         if iteration % backtrack_rate == 0 {
-            let backtrack_amount = min(5, path.len() - 2);
-            for i in &path[(path.len() - backtrack_amount)..] {
+            let actual_backtrack_amount = min(5, path.len() - 2);
+            for i in &path[(path.len() - actual_backtrack_amount)..] {
                 member[*i] = false;
             }
-            let new_size = path.len() - backtrack_amount;
+            let new_size = path.len() - actual_backtrack_amount;
             path.truncate(new_size);
         }
 

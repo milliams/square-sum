@@ -40,7 +40,14 @@ fn squares() -> std::iter::Map<std::ops::Range<usize>, fn(usize) -> usize> {
 
 fn square_sum_graph(n: usize) -> petgraph::Graph<(), (), petgraph::Undirected, usize> {
     let s: Vec<usize> = squares().take_while(|&x| x <= (n * 2) - 1).collect();
-    let mut g = petgraph::Graph::default(); // TODO use with_capacity
+    let num_edges: usize = integers()
+        .take(n)
+        .map(|i| {
+            f64::floor(f64::sqrt(((i * 2) - 1) as f64)) as usize
+                - f64::floor(f64::sqrt(i as f64)) as usize
+        })
+        .sum();
+    let mut g = petgraph::Graph::with_capacity(n, num_edges);
     //let mut g = petgraph::Graph::with_capacity(16384, 579038);
     for i in integers().take(n) {
         g.add_node(());

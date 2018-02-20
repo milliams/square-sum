@@ -85,11 +85,54 @@ where
     g.node_count()
 }
 
+struct Path {
+    path: Vec<usize>,
+    member: Vec<bool>,
+}
+
+impl Path {
+    fn new(size: usize) -> Path {
+        Path{
+            path: Vec::with_capacity(size),
+            member: vec![false; size],
+        }
+    }
+
+    fn push(&mut self, node_index: usize) {
+        self.path.push(node_index);
+        self.member[node_index] = true;
+    }
+
+    fn len(&self) -> usize {
+        self.path.len()
+    }
+
+    fn contains(&self, node_index: usize) -> bool {
+        self.member[node_index]
+    }
+
+    fn backtrack(&mut self, amount: usize) {
+        let actual_backtrack_amount = min(amount, self.path.len() - 2);
+        for i in &self.path[(self.path.len() - actual_backtrack_amount)..] {
+            self.member[*i] = false;
+        }
+        let new_size = self.path.len() - actual_backtrack_amount;
+        self.path.truncate(new_size);
+    }
+
+    fn reverse(&mut self) {
+        self.path.reverse();
+    }
+
+    fn iter(&self) -> std::slice::Iter<usize> {
+        self.path.iter()
+    }
+}
+
 fn setup_path<N, E, Ty>(
     g: &petgraph::Graph<N, E, Ty, usize>,
-    path: &mut Vec<usize>,
-    member: &mut Vec<bool>,
-) where
+) -> Path
+where
     Ty: petgraph::EdgeType,
 {
     let mut rng = rand::thread_rng();
@@ -100,13 +143,12 @@ fn setup_path<N, E, Ty>(
         .expect("Node had no neighbours!")
         .index();
 
-    path.clear();
-    member.iter_mut().map(|x| *x = false).count();
+    let mut path = Path::new(order(g));
 
     path.push(start.index());
     path.push(next);
-    member[start.index()] = true;
-    member[next] = true;
+
+    path
 }
 
 fn find_hamiltonian<N, E, Ty>(
@@ -127,14 +169,12 @@ where
 
     let mut rng = rand::thread_rng();
 
-    let mut path: Vec<usize> = Vec::with_capacity(order(g));
-    let mut member: Vec<bool> = vec![false; order(g)];
+    let mut path = setup_path(g);
+
     let mut longest_path: Vec<usize> = Vec::with_capacity(order(g));
 
     let mut iteration = 0;
     let mut resets = 0;
-
-    setup_path(g, &mut path, &mut member);
 
     loop {
         // Reverse the path often
@@ -146,27 +186,22 @@ where
         if iteration > reset_rate {
             iteration = 1;
             resets += 1;
-            setup_path(g, &mut path, &mut member);
+            path = setup_path(g);
             continue;
         }
 
         // Backtrack a smidge now and again
         if iteration % backtrack_rate == 0 {
-            let actual_backtrack_amount = min(backtrack_amount, path.len() - 2);
-            for i in &path[(path.len() - actual_backtrack_amount)..] {
-                member[*i] = false;
-            }
-            let new_size = path.len() - actual_backtrack_amount;
-            path.truncate(new_size);
+            path.backtrack(backtrack_amount);
         }
 
         // Current vertex is `v`
-        let v = *path.last()
+        let v = *path.path.last()
             .expect("There should be at least one node in the path");
 
         // Create list of possible next vertices
         let possible_next_nodes: Vec<_> = g.neighbors((v).into())
-            .filter(|n| !member[n.index()])
+            .filter(|n| !path.contains(n.index()))
             .collect();
         let next = rng.choose(&possible_next_nodes)
             .and_then(|i| Some(i.index()));
@@ -174,14 +209,13 @@ where
         // If there are any, choose one randomly and add it to the path
         if let Some(v) = next {
             path.push(v);
-            member[v] = true;
         } else {
             // but we have a new longest path anyway, so set `longest_path`
             if path.len() > longest_path.len() {
-                longest_path = path.clone();
+                longest_path = path.path.clone();
             }
             // choose any neighbour, `n`, of `v` (which must already be in `path`) and reverse path from `n` (not including n) to `v`
-            let previous_node = path[path.len() - 2];
+            let previous_node = path.path[path.len() - 2];
             let possible_pivots: Vec<_> = g.neighbors((v).into())
                 .filter(|n| n.index() != previous_node)
                 .collect();
@@ -189,7 +223,7 @@ where
                 let pivot_pos = path.iter()
                     .position(|&v| v == pivot.index())
                     .expect("Pivot must be in the path");
-                path[pivot_pos + 1..].reverse();
+                path.path[pivot_pos + 1..].reverse();
             }
         }
 

@@ -22,8 +22,11 @@ fn main() {
     println!("{} seconds", start_ham.to(end_ham));
 
     match ham {
-        Some(h) => {println!("found")},
-        None => {println!("fail")}
+        Ok(h) => {
+            println!("found", );
+            println!("valid square-sum sequence {}", check_sum_squares(h));
+        },
+        Err(e) => {println!("fail {:?}", e)}
     }
 }
 
@@ -78,9 +81,9 @@ fn setup_path(g: &petgraph::Graph<usize, u8, petgraph::Undirected, usize>, path:
 
 fn find_hamiltonian(
     g: &petgraph::Graph<usize, u8, petgraph::Undirected, usize>,
-) -> Option<Vec<usize>> {
+) -> Result<Vec<usize>, &'static str> {
     if petgraph::algo::connected_components(&g) != 1 {
-        return None;
+        return Err("Not a fully-connected graph");
     }
 
     let reverse_rate = 10;
@@ -153,12 +156,15 @@ fn find_hamiltonian(
         if path.len() == g.node_count() {
             println!("iterations: {:?}", iteration);
             println!("resets: {:?}", resets);
-            return Some(path);
+            return Ok(path.iter().map(|&a| a+1).collect());
         }
 
         // If we've 'timed out', fail
         if resets * reset_rate > max_iterations {
-            return None;
+            println!("iterations: {:?}", iteration);
+            println!("resets: {:?}", resets);
+            println!("total iterations: {:?}", resets * reset_rate);
+            return Err("Timeout");
         }
 
         iteration += 1;

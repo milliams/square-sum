@@ -2,7 +2,7 @@ extern crate petgraph;
 extern crate rand;
 extern crate time;
 
-use std::cmp::min;
+use std::cmp::{min, max};
 
 use rand::Rng;
 
@@ -95,10 +95,10 @@ fn find_hamiltonian(
         return Err("Not a fully-connected graph");
     }
 
-    let reverse_rate = 10;
-    let backtrack_rate = 1000;
-    let backtrack_amount = 5;
-    let reset_rate = g.node_count() * 5; // Must be larger than num nodes
+    let reverse_rate = max(100, g.node_count() / 1000);
+    let backtrack_rate = max(1000, g.node_count() / 100);
+    let backtrack_amount = max(5, g.node_count() / 10000);
+    let reset_rate = g.node_count() * 10; // Must be larger than num nodes
     let max_iterations = reset_rate * 5;
 
     let mut rng = rand::thread_rng();

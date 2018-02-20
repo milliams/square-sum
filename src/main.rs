@@ -92,7 +92,7 @@ struct Path {
 
 impl Path {
     fn new(size: usize) -> Path {
-        Path{
+        Path {
             path: Vec::with_capacity(size),
             member: vec![false; size],
         }
@@ -129,9 +129,7 @@ impl Path {
     }
 }
 
-fn setup_path<N, E, Ty>(
-    g: &petgraph::Graph<N, E, Ty, usize>,
-) -> Path
+fn setup_path<N, E, Ty>(g: &petgraph::Graph<N, E, Ty, usize>) -> Result<Path, &'static str>
 where
     Ty: petgraph::EdgeType,
 {
@@ -139,16 +137,14 @@ where
 
     let start = petgraph::graph::node_index(rng.gen_range(0, order(g)));
     let neighbours = g.neighbors(start).collect::<Vec<_>>();
-    let next = rng.choose(&neighbours)
-        .expect("Node had no neighbours!")
-        .index();
+    let next = rng.choose(&neighbours).ok_or("Node had no neighbours!")?;
 
     let mut path = Path::new(order(g));
 
     path.push(start.index());
-    path.push(next);
+    path.push(next.index());
 
-    path
+    Ok(path)
 }
 
 fn find_hamiltonian<N, E, Ty>(
@@ -169,7 +165,7 @@ where
 
     let mut rng = rand::thread_rng();
 
-    let mut path = setup_path(g);
+    let mut path = setup_path(g)?;
 
     let mut longest_path: Vec<usize> = Vec::with_capacity(order(g));
 
@@ -186,7 +182,7 @@ where
         if iteration > reset_rate {
             iteration = 1;
             resets += 1;
-            path = setup_path(g);
+            path = setup_path(g)?;
             continue;
         }
 
@@ -196,8 +192,9 @@ where
         }
 
         // Current vertex is `v`
-        let v = *path.path.last()
-            .expect("There should be at least one node in the path");
+        let v = *path.path
+            .last()
+            .ok_or("There should be at least one node in the path")?;
 
         // Create list of possible next vertices
         let possible_next_nodes: Vec<_> = g.neighbors((v).into())
@@ -222,7 +219,7 @@ where
             if let Some(pivot) = rng.choose(&possible_pivots) {
                 let pivot_pos = path.iter()
                     .position(|&v| v == pivot.index())
-                    .expect("Pivot must be in the path");
+                    .ok_or("Pivot must be in the path")?;
                 path.path[pivot_pos + 1..].reverse();
             }
         }

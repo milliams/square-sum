@@ -226,17 +226,11 @@ where
 
         // If we've found all nodes, return
         if path.len() == g.node_count() {
-            println!("iterations: {:?}", iteration);
-            println!("resets: {:?}", resets);
-            println!("total iterations: {:?}", resets * reset_rate);
             return Ok(path.iter().map(|&a| a + 1).collect());
         }
 
         // If we've 'timed out', fail
         if resets * reset_rate > max_iterations {
-            println!("iterations: {:?}", iteration);
-            println!("resets: {:?}", resets);
-            println!("total iterations: {:?}", resets * reset_rate);
             return Err("Timeout");
         }
 

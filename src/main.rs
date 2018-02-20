@@ -78,15 +78,20 @@ fn add_square_sum_node(
     }
 }
 
-fn order<N, E>(g: &petgraph::Graph<N, E, petgraph::Undirected, usize>) -> usize {
+fn order<N, E, Ty>(g: &petgraph::Graph<N, E, Ty, usize>) -> usize
+where
+    Ty: petgraph::EdgeType,
+{
     g.node_count()
 }
 
-fn setup_path<N, E>(
-    g: &petgraph::Graph<N, E, petgraph::Undirected, usize>,
+fn setup_path<N, E, Ty>(
+    g: &petgraph::Graph<N, E, Ty, usize>,
     path: &mut Vec<usize>,
     member: &mut Vec<bool>,
-) {
+) where
+    Ty: petgraph::EdgeType,
+{
     let mut rng = rand::thread_rng();
 
     let start = petgraph::graph::node_index(rng.gen_range(0, order(g)));
@@ -104,9 +109,12 @@ fn setup_path<N, E>(
     member[next] = true;
 }
 
-fn find_hamiltonian<N, E>(
-    g: &petgraph::Graph<N, E, petgraph::Undirected, usize>,
-) -> Result<Vec<usize>, &'static str> {
+fn find_hamiltonian<N, E, Ty>(
+    g: &petgraph::Graph<N, E, Ty, usize>,
+) -> Result<Vec<usize>, &'static str>
+where
+    Ty: petgraph::EdgeType,
+{
     if petgraph::algo::connected_components(&g) != 1 {
         return Err("Not a fully-connected graph");
     }

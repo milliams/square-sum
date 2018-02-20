@@ -23,10 +23,10 @@ fn main() {
 
     match ham {
         Ok(h) => {
-            println!("found", );
-            println!("valid square-sum sequence {}", check_sum_squares(h));
-        },
-        Err(e) => {println!("fail {:?}", e)}
+            println!("found");
+            println!("valid square-sum sequence {}", check_sum_squares(&h));
+        }
+        Err(e) => println!("fail {:?}", e),
     }
 }
 
@@ -48,10 +48,12 @@ fn square_sum_graph(n: usize) -> petgraph::Graph<(), (), petgraph::Undirected, u
         })
         .sum();
     let mut g = petgraph::Graph::with_capacity(n, num_edges);
-    //let mut g = petgraph::Graph::with_capacity(16384, 579038);
     for i in integers().take(n) {
         g.add_node(());
-        for sq in s.iter().skip(1).skip_while(|&sq| sq <= &i).take_while(|&sq| sq <= &((i * 2) - 1)) {
+        for sq in s.iter()
+            .skip_while(|&sq| sq <= &i)
+            .take_while(|&sq| sq <= &((i * 2) - 1))
+        {
             let i_index = petgraph::graph::node_index(i - 1);
             let j_index = petgraph::graph::node_index(sq - i - 1);
             g.update_edge(i_index, j_index, ());
@@ -64,12 +66,18 @@ fn order(g: &petgraph::Graph<(), (), petgraph::Undirected, usize>) -> usize {
     g.node_count()
 }
 
-fn setup_path(g: &petgraph::Graph<(), (), petgraph::Undirected, usize>, path: &mut Vec<usize>, member: &mut Vec<bool>) {
+fn setup_path(
+    g: &petgraph::Graph<(), (), petgraph::Undirected, usize>,
+    path: &mut Vec<usize>,
+    member: &mut Vec<bool>,
+) {
     let mut rng = rand::thread_rng();
 
     let start = petgraph::graph::node_index(rng.gen_range(0, order(g)));
     let neighbours = g.neighbors(start).collect::<Vec<_>>();
-    let next = rng.choose(&neighbours).expect("Node had no neighbours!").index();
+    let next = rng.choose(&neighbours)
+        .expect("Node had no neighbours!")
+        .index();
 
     path.clear();
     member.iter_mut().map(|x| *x = false).count();
@@ -90,7 +98,7 @@ fn find_hamiltonian(
     let reverse_rate = 10;
     let backtrack_rate = 1000;
     let backtrack_amount = 5;
-    let reset_rate = g.node_count() * 5;  // Must be larger than num nodes
+    let reset_rate = g.node_count() * 5; // Must be larger than num nodes
     let max_iterations = reset_rate * 5;
 
     let mut rng = rand::thread_rng();
@@ -129,11 +137,15 @@ fn find_hamiltonian(
         }
 
         // Current vertex is `v`
-        let v = *path.last().expect("There should be at least one node in the path");
+        let v = *path.last()
+            .expect("There should be at least one node in the path");
 
         // Create list of possible next vertices
-        let possible_next_nodes: Vec<_> = g.neighbors((v).into()).filter(|n| !member[n.index()]).collect();
-        let next = rng.choose(&possible_next_nodes).and_then(|i| Some(i.index()));
+        let possible_next_nodes: Vec<_> = g.neighbors((v).into())
+            .filter(|n| !member[n.index()])
+            .collect();
+        let next = rng.choose(&possible_next_nodes)
+            .and_then(|i| Some(i.index()));
 
         // If there are any, choose one randomly and add it to the path
         if let Some(v) = next {
@@ -145,11 +157,15 @@ fn find_hamiltonian(
                 longest_path = path.clone();
             }
             // choose any neighbour, `n`, of `v` (which must already be in `path`) and reverse path from `n` (not including n) to `v`
-            let previous_node = path[path.len()-2];
-            let possible_pivots: Vec<_> = g.neighbors((v).into()).filter(|n| n.index() != previous_node).collect();
+            let previous_node = path[path.len() - 2];
+            let possible_pivots: Vec<_> = g.neighbors((v).into())
+                .filter(|n| n.index() != previous_node)
+                .collect();
             if let Some(pivot) = rng.choose(&possible_pivots) {
-                let pivot_pos = path.iter().position(|&v| v == pivot.index()).expect("Pivot must be in the path");
-                path[pivot_pos+1..].reverse();
+                let pivot_pos = path.iter()
+                    .position(|&v| v == pivot.index())
+                    .expect("Pivot must be in the path");
+                path[pivot_pos + 1..].reverse();
             }
         }
 
@@ -158,7 +174,7 @@ fn find_hamiltonian(
             println!("iterations: {:?}", iteration);
             println!("resets: {:?}", resets);
             println!("total iterations: {:?}", resets * reset_rate);
-            return Ok(path.iter().map(|&a| a+1).collect());
+            return Ok(path.iter().map(|&a| a + 1).collect());
         }
 
         // If we've 'timed out', fail
@@ -173,7 +189,11 @@ fn find_hamiltonian(
     }
 }
 
-fn check_sum_squares(vals: Vec<usize>) -> bool {
-    let s: Vec<usize> = squares().take_while(|&x| x <= (vals.len() * 2) - 1).collect();
-    vals.iter().zip(vals.iter().skip(1)).all(|(&a, &b)| s.contains(&(a+b)))
+fn check_sum_squares(vals: &[usize]) -> bool {
+    let s: Vec<usize> = squares()
+        .take_while(|&x| x <= (vals.len() * 2) - 1)
+        .collect();
+    vals.iter()
+        .zip(vals.iter().skip(1))
+        .all(|(&a, &b)| s.contains(&(a + b)))
 }

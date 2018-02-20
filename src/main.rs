@@ -2,7 +2,7 @@ extern crate petgraph;
 extern crate rand;
 extern crate time;
 
-use std::cmp::{min, max};
+use std::cmp::{max, min};
 
 use rand::Rng;
 
@@ -29,7 +29,7 @@ fn main() {
         Err(e) => {
             println!("fail {:?}", e);
             ::std::process::exit(1);
-        },
+        }
     }
 }
 
@@ -61,10 +61,14 @@ fn init_square_sum_path(n: usize) -> petgraph::Graph<(), (), petgraph::Undirecte
     petgraph::Graph::with_capacity(n, num_edges)
 }
 
-fn add_square_sum_node(g: &mut petgraph::Graph<(), (), petgraph::Undirected, usize>, square_numbers: &[usize]) {
+fn add_square_sum_node(
+    g: &mut petgraph::Graph<(), (), petgraph::Undirected, usize>,
+    square_numbers: &[usize],
+) {
     let i = g.node_count() + 1;
     g.add_node(());
-    for sq in square_numbers.iter()
+    for sq in square_numbers
+        .iter()
         .skip_while(|&sq| sq <= &i)
         .take_while(|&sq| sq <= &((i * 2) - 1))
     {

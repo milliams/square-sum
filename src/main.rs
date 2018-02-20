@@ -120,7 +120,7 @@ fn find_hamiltonian(
 
         // Backtrack a smidge now and again
         if iteration % backtrack_rate == 0 {
-            let actual_backtrack_amount = min(5, path.len() - 2);
+            let actual_backtrack_amount = min(backtrack_amount, path.len() - 2);
             for i in &path[(path.len() - actual_backtrack_amount)..] {
                 member[*i] = false;
             }

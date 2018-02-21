@@ -48,15 +48,6 @@ fn squares() -> std::iter::Map<std::ops::Range<usize>, fn(usize) -> usize> {
     integers().map(|x| x * x)
 }
 
-fn square_sum_graph(n: usize) -> petgraph::Graph<(), (), petgraph::Undirected, usize> {
-    let mut g = init_square_sum_path(n);
-    let s: Vec<usize> = squares().take_while(|&x| x <= (n * 2) - 1).collect();
-    for _i in integers().take(n) {
-        add_square_sum_node(&mut g, &s);
-    }
-    g
-}
-
 fn init_square_sum_path(n: usize) -> petgraph::Graph<(), (), petgraph::Undirected, usize> {
     let num_edges: usize = integers()
         .take(n)

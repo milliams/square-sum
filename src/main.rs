@@ -167,7 +167,7 @@ where
 
     let reverse_rate = max(100, g.node_count() / 1000);
     let backtrack_rate = max(1000, g.node_count() / 100);
-    let backtrack_amount = max(5, g.node_count() / 10000);
+    let backtrack_amount = max(5, g.node_count() / 10_000);
     let reset_rate = g.node_count() * 10; // Must be larger than num nodes
     let max_iterations = reset_rate * 5;
 

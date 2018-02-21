@@ -6,9 +6,7 @@ use std::cmp::{max, min};
 use std::collections::HashSet;
 
 use rand::Rng;
-
 use time::PreciseTime;
-
 
 fn main() {
     let start_time = PreciseTime::now();
@@ -28,7 +26,7 @@ fn main() {
 
     let mut ham = None; // Cache for previous loop's path
 
-    for n in start..limit {
+    for _ in start..limit {
         add_square_sum_node(&mut g, &s);
         if find_all {
             find_all_paths(&g);
@@ -41,11 +39,14 @@ fn main() {
     println!("{} seconds.", start_time.to(end_time).num_seconds());
 }
 
-fn find_any_path<N, E, Ty>(g: &petgraph::Graph<N, E, Ty, usize>, ham: Option<Vec<usize>>) -> Option<Vec<usize>>
+fn find_any_path<N, E, Ty>(
+    g: &petgraph::Graph<N, E, Ty, usize>,
+    ham: Option<Vec<usize>>,
+) -> Option<Vec<usize>>
 where
     Ty: petgraph::EdgeType,
 {
-    match find_hamiltonian(&g, ham) {
+    match find_hamiltonian(g, ham) {
         Ok(h) => Some(h),
         Err(e) => {
             println!("{} fails with {}", g.node_count(), e);
@@ -64,11 +65,9 @@ where
     loop {
         tries += 1;
 
-        let ham = match find_hamiltonian(&g, None) {
+        let ham = match find_hamiltonian(g, None) {
             Ok(h) => Some(h),
-            Err(_) => {
-                None
-            }
+            Err(_) => None,
         };
 
         if let Some(mut p) = ham.clone() {
@@ -84,11 +83,16 @@ where
             failed_tries += 1;
         }
 
-        if failed_tries > max(3,  (tries as f32 * 0.7) as usize) {
+        if failed_tries > max(3, (tries as f32 * 0.7) as usize) {
             break;
         }
     }
-    println!("{} has {} paths from {} tries", g.node_count(), paths.len(), tries);
+    println!(
+        "{} has {} paths from {} tries",
+        g.node_count(),
+        paths.len(),
+        tries
+    );
 
     paths
 }
@@ -150,10 +154,7 @@ impl Path {
             path.push(i - 1);
             member[*i - 1] = true;
         }
-        Path {
-            path,
-            member,
-        }
+        Path { path, member }
     }
 
     fn push(&mut self, node_index: usize) {

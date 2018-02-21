@@ -206,15 +206,13 @@ where
             .ok_or("There should be at least one node in the path")?;
 
         // Create list of possible next vertices
-        let possible_next_nodes: Vec<_> = g.neighbors((v).into())
+        let possible_next_nodes: Vec<_> = g.neighbors(v.into())
             .filter(|n| !path.contains(n.index()))
             .collect();
-        let next = rng.choose(&possible_next_nodes)
-            .and_then(|i| Some(i.index()));
 
         // If there are any, choose one randomly and add it to the path
-        if let Some(v) = next {
-            path.push(v);
+        if let Some(v) = rng.choose(&possible_next_nodes) {
+            path.push(v.index());
         } else {
             // but we have a new longest path anyway, so set `longest_path`
             if path.len() > longest_path.len() {
@@ -222,7 +220,7 @@ where
             }
             // choose any neighbour, `n`, of `v` (which must already be in `path`) and reverse path from `n` (not including n) to `v`
             let previous_node = path.path[path.len() - 2];
-            let possible_pivots: Vec<_> = g.neighbors((v).into())
+            let possible_pivots: Vec<_> = g.neighbors(v.into())
                 .filter(|n| n.index() != previous_node)
                 .collect();
             if let Some(pivot) = rng.choose(&possible_pivots) {

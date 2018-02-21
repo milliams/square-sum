@@ -27,17 +27,24 @@ fn main() {
 
     for n in start..limit {
         add_square_sum_node(&mut g, &s);
-        ham = match find_hamiltonian(&g, ham) {
-            Ok(h) => Some(h),
-            Err(e) => {
-                println!("{} fails with {}", n, e);
-                None
-            }
-        }
+        ham = find_any_path(&g, ham);
     }
 
     let end_time = PreciseTime::now();
     println!("{} seconds.", start_time.to(end_time).num_seconds());
+}
+
+fn find_any_path<N, E, Ty>(g: &petgraph::Graph<N, E, Ty, usize>, ham: Option<Vec<usize>>) -> Option<Vec<usize>>
+where
+    Ty: petgraph::EdgeType,
+{
+    match find_hamiltonian(&g, ham) {
+        Ok(h) => Some(h),
+        Err(e) => {
+            println!("{} fails with {}", g.node_count(), e);
+            None
+        }
+    }
 }
 
 fn integers() -> std::ops::Range<usize> {

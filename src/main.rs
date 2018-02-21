@@ -6,31 +6,38 @@ use std::cmp::{max, min};
 
 use rand::Rng;
 
+use time::PreciseTime;
+
+
 fn main() {
-    println!("Generating graph... ");
-    let start_graph = time::PreciseTime::now();
-    let g = square_sum_graph(usize::pow(2, 18));
-    let end_graph = time::PreciseTime::now();
-    println!("{} seconds", start_graph.to(end_graph));
+    let start_time = PreciseTime::now();
 
-    println!("nodes: {} edges: {}", g.node_count(), g.edge_count());
+    let start = 1;
+    let limit = usize::pow(2, 14);
 
-    println!("Finding Hamiltonian path... ");
-    let start_ham = time::PreciseTime::now();
-    let ham = find_hamiltonian(&g);
-    let end_ham = time::PreciseTime::now();
-    println!("{} seconds", start_ham.to(end_ham));
+    let mut g = init_square_sum_path(limit);
+    let s: Vec<usize> = squares().take_while(|&x| x <= (limit * 2) - 1).collect();
 
-    match ham {
-        Ok(h) => {
-            println!("found");
-            println!("valid square-sum sequence {}", check_sum_squares(&h));
-        }
-        Err(e) => {
-            println!("fail {:?}", e);
-            ::std::process::exit(1);
+    // Prime the graph up to the start of the search
+    for _ in 1..start {
+        add_square_sum_node(&mut g, &s);
+    }
+
+    let mut ham = None; // Cache for previous loop's path
+
+    for n in start..limit {
+        add_square_sum_node(&mut g, &s);
+        ham = match find_hamiltonian(&g, ham) {
+            Ok(h) => Some(h),
+            Err(e) => {
+                println!("{} fails with {}", n, e);
+                None
+            }
         }
     }
+
+    let end_time = PreciseTime::now();
+    println!("{} seconds.", start_time.to(end_time).num_seconds());
 }
 
 fn integers() -> std::ops::Range<usize> {

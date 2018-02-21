@@ -3,6 +3,7 @@ extern crate rand;
 extern crate time;
 
 use std::cmp::{max, min};
+use std::collections::HashSet;
 
 use rand::Rng;
 
@@ -23,11 +24,17 @@ fn main() {
         add_square_sum_node(&mut g, &s);
     }
 
+    let find_all = true;
+
     let mut ham = None; // Cache for previous loop's path
 
     for n in start..limit {
         add_square_sum_node(&mut g, &s);
-        ham = find_any_path(&g, ham);
+        if find_all {
+            find_all_paths(&g);
+        } else {
+            ham = find_any_path(&g, ham);
+        }
     }
 
     let end_time = PreciseTime::now();
@@ -45,6 +52,45 @@ where
             None
         }
     }
+}
+
+fn find_all_paths<N, E, Ty>(g: &petgraph::Graph<N, E, Ty, usize>) -> HashSet<std::vec::Vec<usize>>
+where
+    Ty: petgraph::EdgeType,
+{
+    let mut tries = 0;
+    let mut failed_tries = 0;
+    let mut paths = HashSet::new();
+    loop {
+        tries += 1;
+
+        let ham = match find_hamiltonian(&g, None) {
+            Ok(h) => Some(h),
+            Err(_) => {
+                None
+            }
+        };
+
+        if let Some(mut p) = ham.clone() {
+            if p.first().unwrap() > p.last().unwrap() {
+                p.reverse();
+            }
+            if paths.insert(p) {
+                failed_tries = 0;
+            } else {
+                failed_tries += 1;
+            }
+        } else {
+            failed_tries += 1;
+        }
+
+        if failed_tries > max(3,  (tries as f32 * 0.7) as usize) {
+            break;
+        }
+    }
+    println!("{} has {} paths from {} tries", g.node_count(), paths.len(), tries);
+
+    paths
 }
 
 fn integers() -> std::ops::Range<usize> {

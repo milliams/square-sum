@@ -78,13 +78,6 @@ fn add_square_sum_node(
     }
 }
 
-fn order<N, E, Ty>(g: &petgraph::Graph<N, E, Ty, usize>) -> usize
-where
-    Ty: petgraph::EdgeType,
-{
-    g.node_count()
-}
-
 struct Path {
     path: Vec<usize>,
     member: Vec<bool>,
@@ -135,11 +128,11 @@ where
 {
     let mut rng = rand::thread_rng();
 
-    let start = petgraph::graph::node_index(rng.gen_range(0, order(g)));
+    let start = petgraph::graph::node_index(rng.gen_range(0, g.node_count()));
     let neighbours = g.neighbors(start).collect::<Vec<_>>();
     let next = rng.choose(&neighbours).ok_or("Node had no neighbours!")?;
 
-    let mut path = Path::new(order(g));
+    let mut path = Path::new(g.node_count());
 
     path.push(start.index());
     path.push(next.index());
@@ -168,14 +161,14 @@ where
 
     let mut path = match seed {
         Some(s) => {
-            let mut p = Path::new(order(g));
+            let mut p = Path::new(g.node_count());
             p.path = s;
             p
         },
         None => setup_path(g)?,
     };
 
-    let mut longest_path: Vec<usize> = Vec::with_capacity(order(g));
+    let mut longest_path: Vec<usize> = Vec::with_capacity(g.node_count());
 
     let mut iteration = 0;
     let mut resets = 0;

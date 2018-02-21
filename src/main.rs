@@ -91,6 +91,20 @@ impl Path {
         }
     }
 
+    fn from_seed(seed: &[usize], size: usize) -> Path {
+        // TODO check that size >= seed.len()
+        let mut path = Vec::with_capacity(size);
+        let mut member = vec![false; size];
+        for i in seed.iter() {
+            path.push(i - 1);
+            member[*i - 1] = true;
+        }
+        Path {
+            path,
+            member,
+        }
+    }
+
     fn push(&mut self, node_index: usize) {
         self.path.push(node_index);
         self.member[node_index] = true;
@@ -160,11 +174,7 @@ where
     let mut rng = rand::thread_rng();
 
     let mut path = match seed {
-        Some(s) => {
-            let mut p = Path::new(g.node_count());
-            p.path = s;
-            p
-        },
+        Some(s) => Path::from_seed(&s, g.node_count()),
         None => setup_path(g)?,
     };
 

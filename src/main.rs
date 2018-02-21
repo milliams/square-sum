@@ -149,6 +149,7 @@ where
 
 fn find_hamiltonian<N, E, Ty>(
     g: &petgraph::Graph<N, E, Ty, usize>,
+    seed: Option<Vec<usize>>,
 ) -> Result<Vec<usize>, &'static str>
 where
     Ty: petgraph::EdgeType,
@@ -165,7 +166,14 @@ where
 
     let mut rng = rand::thread_rng();
 
-    let mut path = setup_path(g)?;
+    let mut path = match seed {
+        Some(s) => {
+            let mut p = Path::new(order(g));
+            p.path = s;
+            p
+        },
+        None => setup_path(g)?,
+    };
 
     let mut longest_path: Vec<usize> = Vec::with_capacity(order(g));
 

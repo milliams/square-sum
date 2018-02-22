@@ -65,7 +65,27 @@ fn main() {
         add_square_sum_node(&mut g, &s);
         match method {
             Method::All => {
-                find_all_paths(&g);
+                let paths = find_all_paths(&g);
+                if !paths.is_empty() {
+                    let next_num = g.node_count() + 1;
+                    let relevant_squares: Vec<_> = squares()
+                        .skip_while(|&sq| sq <= next_num)
+                        .take_while(|&sq| sq <= (next_num * 2) - 1)
+                        .collect();
+                    let magic_paths: Vec<_> = paths
+                        .iter()
+                        .filter(|&p| {
+                            relevant_squares
+                                .iter()
+                                .any(|sq| *p.first().unwrap() == sq - next_num || *p.last().unwrap() == sq - next_num)
+                        })
+                        .collect();
+                    if magic_paths.is_empty() {
+                        println!("{} has no magic paths", g.node_count());
+                    } else {
+                        println!("{} has {} magic paths", g.node_count(), magic_paths.len());
+                    }
+                }
             },
             Method::Any => {
                 ham = find_any_path(&g, ham);

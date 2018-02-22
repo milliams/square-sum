@@ -7,3 +7,4 @@ authors = ["Matt Williams <matt@milliams.com>"]
 petgraph = "0.4.11"
 rand = "0.4"
 time = "*"
+clap = "2.30.0"

@@ -1,6 +1,7 @@
 extern crate petgraph;
 extern crate rand;
 extern crate time;
+extern crate clap;
 
 use std::cmp::{max, min};
 use std::collections::HashSet;
@@ -8,11 +9,45 @@ use std::collections::HashSet;
 use rand::Rng;
 use time::PreciseTime;
 
+enum Method {
+    Any,
+    All,
+}
+
 fn main() {
+    let matches = clap::App::new("square-sum")
+        .about("Calculates solutions to the square sum problem")
+        .author("Matt Williams")
+        .arg(clap::Arg::with_name("start")
+            .short("s")
+            .long("start")
+            .value_name("N")
+            .default_value("0")
+            .help("The start of the sequence to calculate"))
+        .arg(clap::Arg::with_name("end")
+            .short("e")
+            .long("end")
+            .value_name("N")
+            .default_value("100")
+            .help("The end of the sequence to calculate (exclusive)"))
+        .arg(clap::Arg::with_name("find")
+            .short("f")
+            .long("find")
+            .value_name("METHOD")
+            .default_value("any")
+            .possible_values(&["any", "all"])
+            .help("Whether to find *all* paths for each graph or *any* path for each graph"))
+        .get_matches();
+
     let start_time = PreciseTime::now();
 
-    let start = 1;
-    let limit = usize::pow(2, 14);
+    let start: usize = matches.value_of("start").unwrap().parse().expect("Could not parse start value");
+    let limit: usize = matches.value_of("end").unwrap().parse().expect("Could not parse end value");
+    let method = match matches.value_of("find").unwrap() {
+        "any" => Method::Any,
+        "all" => Method::All,
+        _ => panic!(),
+    };
 
     let mut g = init_square_sum_path(limit);
     let s: Vec<usize> = squares().take_while(|&x| x <= (limit * 2) - 1).collect();
@@ -28,10 +63,13 @@ fn main() {
 
     for _ in start..limit {
         add_square_sum_node(&mut g, &s);
-        if find_all {
-            find_all_paths(&g);
-        } else {
-            ham = find_any_path(&g, ham);
+        match method {
+            Method::All => {
+                find_all_paths(&g);
+            },
+            Method::Any => {
+                ham = find_any_path(&g, ham);
+            }
         }
     }
 

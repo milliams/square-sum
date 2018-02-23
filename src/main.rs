@@ -57,8 +57,6 @@ fn main() {
         add_square_sum_node(&mut g, &s);
     }
 
-    let find_all = true;
-
     let mut ham = None; // Cache for previous loop's path
 
     for _ in start..limit {

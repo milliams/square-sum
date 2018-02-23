@@ -59,10 +59,11 @@ fn main() {
 
     let mut ham = None; // Cache for previous loop's path
 
-    for _ in start..limit {
-        add_square_sum_node(&mut g, &s);
-        match method {
-            Method::All => {
+
+    match method {
+        Method::All => {
+            for _ in start..limit {
+                add_square_sum_node(&mut g, &s);
                 let paths = find_all_paths(&g);
                 if !paths.is_empty() {
                     let next_num = g.node_count() + 1;
@@ -84,8 +85,11 @@ fn main() {
                         println!("{} has {} magic paths", g.node_count(), magic_paths.len());
                     }
                 }
-            },
-            Method::Any => {
+            }
+        },
+        Method::Any => {
+            for _ in start..limit {
+                add_square_sum_node(&mut g, &s);
                 ham = find_any_path(&g, ham);
             }
         }
